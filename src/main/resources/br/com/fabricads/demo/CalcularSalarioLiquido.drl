@@ -1,0 +1,20 @@
+package br.com.fabricads.demo;
+
+import org.apache.commons.math3.util.Precision;
+
+rule "CalcularSalarioLiquido"
+    dialect "mvel"
+    no-loop true
+    when
+        $funcionario : Funcionario( $verbas : verbas != null )
+        $verbaProventos : Verba( codigo == 96 ) from $verbas
+        $verbaDescontos : Verba( codigo == 97 ) from $verbas
+        not Verba( codigo == 98 ) from $verbas
+    then
+        Verba salarioLiquido = new Verba();
+        salarioLiquido.setCodigo(98);
+        salarioLiquido.setDescricao("Salario Liquido");
+        salarioLiquido.setValor(Precision.round($verbaProventos.getValor() - $verbaDescontos.getValor(), 2));
+        $funcionario.getVerbas().add(salarioLiquido);
+        update($funcionario);
+end

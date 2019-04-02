@@ -1,0 +1,39 @@
+package br.com.fabricads.demo;
+
+import br.com.fabricads.demo.Verba;
+import org.apache.commons.math3.util.Precision;
+
+rule "DefinirValorBaseIRPF"
+    dialect "mvel"
+    no-loop true
+    when
+        $funcionario : Funcionario( $verbas : verbas != null )
+        TabelaIRPF( $deducaoLegal : deducaoLegal != null )
+        Verba( codigo == 69 , valor == null) from $verbas
+        not Verba( codigo == 80 ) from $verbas
+        $proventosBaseIRRF : Number() from accumulate ( Verba( incideIRRF == "S", $valor : valor != null, tipo == Tipo.PROVENTO) from $verbas , sum ( $valor ) )
+        $descontoBaseIRRF : Number() from accumulate ( Verba( incideIRRF == "S", $valor : valor != null, tipo == Tipo.DESCONTO) from $verbas , sum ( $valor ) )
+    then
+        Verba verbaBaseIRRF = new Verba();
+        verbaBaseIRRF.setCodigo(80);
+        verbaBaseIRRF.setDescricao("Desconto IRPF");
+        Double deducao = Precision.round(($proventosBaseIRRF.doubleValue() - $descontoBaseIRRF.doubleValue()) - ($deducaoLegal * $funcionario.getDependentes()), 2);
+        verbaBaseIRRF.setValor(deducao < 0 ? 0 : deducao);
+        $funcionario.getVerbas().add(verbaBaseIRRF);
+        update($funcionario);
+end
+
+rule "CalcularDescontoIRRF"
+    dialect "mvel"
+    no-loop true
+    when
+        $funcionario : Funcionario( $verbas : verbas != null )
+        TabelaIRPF( $deducoes : deducoes != null )
+        $verbaIRRF : Verba( codigo == 69 , valor == null) from $verbas
+        $baseIRPF : Verba( codigo == 80 , valor != null ) from $verbas
+        $base : BaseIRPF( ( $baseIRPF.valor >= valorInicial && $baseIRPF.valor <= valorFinal ) || ( valorFinal == null && $baseIRPF.valor >= valorInicial ) ) from $deducoes
+    then
+        $verbaIRRF.setParametro($base.getAliquota());
+        $verbaIRRF.setValor(Precision.round(($base.getAliquota() * $baseIRPF.getValor()) - $base.getParcela(), 2));
+        update($funcionario);
+end

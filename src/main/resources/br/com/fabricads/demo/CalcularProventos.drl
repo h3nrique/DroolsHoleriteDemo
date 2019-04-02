@@ -1,0 +1,20 @@
+package br.com.fabricads.demo;
+
+import org.apache.commons.math3.util.Precision;
+
+rule "CalcularProventos"
+    dialect "mvel"
+    no-loop true
+    when
+        $funcionario : Funcionario( $verbas : verbas != null )
+        not Verba( valor == null , tipo == Tipo.PROVENTO ) from $verbas
+        not Verba( codigo == 96 ) from $verbas
+        $proventos : Double() from accumulate ( Verba( $valor : valor != null, tipo == Tipo.PROVENTO ) from $verbas , sum ( $valor ) )
+    then
+        Verba totalProventos = new Verba();
+        totalProventos.setCodigo(96);
+        totalProventos.setDescricao("Total de Proventos");
+        totalProventos.setValor(Precision.round($proventos, 2));
+        $funcionario.getVerbas().add(totalProventos);
+        update($funcionario);
+end

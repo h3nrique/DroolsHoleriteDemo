@@ -1,0 +1,35 @@
+package br.com.fabricads.demo;
+
+import java.util.ArrayList
+import org.apache.commons.math3.util.Precision;
+
+/* Calcula o valor das verba de provendo por porcentagem. Ex: Gratificacao periculosidade de 40% do Salario de R$ 998, 0.4 * 998 -> R$ 399.20 */
+rule "CalcularVerbasPorPorcentagem"
+    dialect "mvel"
+    no-loop true
+    when
+        $funcionario : Funcionario( $verbas : verbas != null )
+        $vencimento : Verba( codigo == 10 ) from $verbas
+        $verbasPorcentagem : ArrayList( size > 0 ) from collect ( Verba( valor == null , parametro != null , medida == Medida.PORCENTAGEM) from $verbas )
+    then
+        for(Verba verba : $verbasPorcentagem) {
+            verba.setValor(Precision.round( verba.getParametro() * $vencimento.getValor() , 2) );
+        }
+        update($funcionario);
+end
+
+
+/* Calcula o valor das verba de provendo por unidade. Ex: Auxilio Refeição de R$ 10 por dia, para as 22 dias de trabalho, 10 * 22  = R$ 220 */
+rule "CalcularVerbasPorUndidade"
+    dialect "mvel"
+    no-loop true
+    when
+        $funcionario : Funcionario( $verbas : verbas != null )
+        $vencimento : Verba( codigo == 10 ) from $verbas
+        $verbasPorcentagem : ArrayList( size > 0 ) from collect ( Verba( valor == null , parametro != null , medida == Medida.UNIDADE) from $verbas )
+    then
+        for(Verba verba : $verbasPorcentagem) {
+            verba.setValor(Precision.round( verba.getParametro() * $vencimento.getParametro() , 2));
+        }
+        update($funcionario);
+end
