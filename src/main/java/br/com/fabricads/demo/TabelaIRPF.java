@@ -10,8 +10,8 @@ public @lombok.Data class TabelaIRPF implements java.io.Serializable {
 	@org.kie.api.definition.type.Label("Deducao Legal")
 	private java.lang.Double deducaoLegal;
 
-	@lombok.Singular
+	@lombok.Singular("deducao")
 	@org.kie.api.definition.type.Label(value = "Deducoes")
-	private java.util.List<BaseIRPF> deducoes = new java.util.ArrayList<>();
+	private java.util.List<BaseIRPF> deducoes;
 
 }

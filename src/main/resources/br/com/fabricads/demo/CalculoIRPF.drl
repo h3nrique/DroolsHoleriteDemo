@@ -14,12 +14,8 @@ rule "DefinirValorBaseIRPF"
         $proventosBaseIRRF : Number() from accumulate ( Verba( incideIRRF == "S", $valor : valor != null, tipo == Tipo.PROVENTO) from $verbas , sum ( $valor ) )
         $descontoBaseIRRF : Number() from accumulate ( Verba( incideIRRF == "S", $valor : valor != null, tipo == Tipo.DESCONTO) from $verbas , sum ( $valor ) )
     then
-        Verba verbaBaseIRRF = new Verba();
-        verbaBaseIRRF.setCodigo(80);
-        verbaBaseIRRF.setDescricao("Desconto IRPF");
         Double deducao = Precision.round(($proventosBaseIRRF.doubleValue() - $descontoBaseIRRF.doubleValue()) - ($deducaoLegal * $funcionario.getDependentes()), 2);
-        verbaBaseIRRF.setValor(deducao < 0 ? 0 : deducao);
-        $funcionario.getVerbas().add(verbaBaseIRRF);
+        $funcionario.getVerbas().add(Verba.builder().codigo(80).descricao("Desconto IRPF").valor(deducao < 0 ? 0 : deducao).build());
         update($funcionario);
 end
 

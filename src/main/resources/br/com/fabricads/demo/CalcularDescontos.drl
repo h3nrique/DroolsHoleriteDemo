@@ -2,6 +2,7 @@ package br.com.fabricads.demo;
 
 import org.apache.commons.math3.util.Precision;
 
+/* Após todos os descontos tiverem valores preenchidos faz uma somatoria */
 rule "CalcularDescontos"
     dialect "mvel"
     no-loop true
@@ -11,10 +12,6 @@ rule "CalcularDescontos"
         not Verba( codigo == 97 ) from $verbas
         $descontos : Double() from accumulate ( Verba( $valor : valor != null, tipo == Tipo.DESCONTO) from $verbas , sum ( $valor ) )
     then
-        Verba totalDescontos = new Verba();
-        totalDescontos.setCodigo(97);
-        totalDescontos.setDescricao("Total de Descontos");
-        totalDescontos.setValor(Precision.round($descontos, 2));
-        $funcionario.getVerbas().add(totalDescontos);
+        $funcionario.getVerbas().add(Verba.builder().codigo(97).descricao("Total de Descontos").valor(Precision.round($descontos, 2)).build());
         update($funcionario);
 end

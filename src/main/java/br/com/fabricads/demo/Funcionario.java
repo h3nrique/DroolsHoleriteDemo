@@ -13,8 +13,9 @@ public @lombok.Data class Funcionario implements java.io.Serializable {
 	@org.kie.api.definition.type.Label("Nome")
 	private java.lang.String nome;
 
+	@lombok.Singular("verba")
 	@org.kie.api.definition.type.Label("Verbas")
-	private java.util.List<Verba> verbas = new java.util.ArrayList<>();
+	private java.util.List<Verba> verbas;
 
 	@org.kie.api.definition.type.Label(value = "Depententes")
 	private java.lang.Integer dependentes;

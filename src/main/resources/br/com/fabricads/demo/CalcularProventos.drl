@@ -11,10 +11,6 @@ rule "CalcularProventos"
         not Verba( codigo == 96 ) from $verbas
         $proventos : Double() from accumulate ( Verba( $valor : valor != null, tipo == Tipo.PROVENTO ) from $verbas , sum ( $valor ) )
     then
-        Verba totalProventos = new Verba();
-        totalProventos.setCodigo(96);
-        totalProventos.setDescricao("Total de Proventos");
-        totalProventos.setValor(Precision.round($proventos, 2));
-        $funcionario.getVerbas().add(totalProventos);
+        $funcionario.getVerbas().add(Verba.builder().codigo(96).descricao("Total de Proventos").valor(Precision.round($proventos, 2)).build());
         update($funcionario);
 end

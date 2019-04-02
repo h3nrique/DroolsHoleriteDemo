@@ -11,10 +11,6 @@ rule "CalcularSalarioLiquido"
         $verbaDescontos : Verba( codigo == 97 ) from $verbas
         not Verba( codigo == 98 ) from $verbas
     then
-        Verba salarioLiquido = new Verba();
-        salarioLiquido.setCodigo(98);
-        salarioLiquido.setDescricao("Salario Liquido");
-        salarioLiquido.setValor(Precision.round($verbaProventos.getValor() - $verbaDescontos.getValor(), 2));
-        $funcionario.getVerbas().add(salarioLiquido);
+        $funcionario.getVerbas().add(Verba.builder().codigo(98).descricao("Salario Liquido").valor(Precision.round($verbaProventos.getValor() - $verbaDescontos.getValor(), 2)).build());
         update($funcionario);
 end
